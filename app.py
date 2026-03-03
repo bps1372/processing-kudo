@@ -79,17 +79,17 @@ def extract_address(text):
 st.sidebar.title("Menu Navigasi Processing KUDO")
 menu = st.sidebar.radio(
     "Pilih Task:",
-    ("1. Filter & Download Kolom", 
-     "2. Cek & Hapus Duplikat", 
-     "3. Merge Data (Maks 15)", 
-     "4. Ekstrak Telp & Alamat",
-     "5. Visualisasi Peta (Google Maps & SHP)")
+    ("1. Filter Kolom", 
+     "2. Duplikasi Data", 
+     "3. Merge Data", 
+     "4. Ekstrak Nomor Telpon & Alamat",
+     "5. Visualisasi Peta & Convert excel to shp")
 )
 
 # ==========================================
 # MENU 1
 # ==========================================
-if menu == "1. Filter & Download Kolom":
+if menu == "1. Filter Kolom":
     st.header("1. Tampilkan dan Pilih Kolom Tertentu")
     uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m1')
     if uploaded_file:
@@ -104,7 +104,7 @@ if menu == "1. Filter & Download Kolom":
 # ==========================================
 # MENU 2 (Diperbarui)
 # ==========================================
-elif menu == "2. Cek & Hapus Duplikat":
+elif menu == "2. Duplikasi Data":
     st.header("2. Cek & Hapus Baris Duplikat")
     uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m2')
     
@@ -166,7 +166,7 @@ elif menu == "2. Cek & Hapus Duplikat":
 # ==========================================
 # MENU 3
 # ==========================================
-elif menu == "3. Merge Data (Maks 15)":
+elif menu == "3. Merge Data":
     st.header("3. Gabungkan Beberapa File")
     uploaded_files = st.file_uploader("Upload file (Maks 15)", type=['csv', 'xlsx', 'json'], accept_multiple_files=True, key='m3')
     if uploaded_files:
@@ -182,7 +182,7 @@ elif menu == "3. Merge Data (Maks 15)":
 # ==========================================
 # MENU 4
 # ==========================================
-elif menu == "4. Ekstrak Telp & Alamat":
+elif menu == "4. Ekstrak Nomor Telpon & Alamat":
     st.header("4. Ekstrak Nomor HP dan Alamat")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m4')
     if uploaded_file:
@@ -199,7 +199,7 @@ elif menu == "4. Ekstrak Telp & Alamat":
 # ==========================================
 # MENU 5
 # ==========================================
-elif menu == "5. Visualisasi Peta (Google Maps & SHP)":
+elif menu == "5. Visualisasi Peta & Convert excel to shp":
     st.header("5. Visualisasi Data Peta & Export SHP")
     
     uploaded_file = st.file_uploader("Upload file data spasial", type=['csv', 'xlsx', 'json'], key='m5')
