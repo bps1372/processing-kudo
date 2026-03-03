@@ -60,7 +60,7 @@ def to_shp_zip(df, lat_col, lon_col):
 def extract_phone_number(text):
     if pd.isna(text):
         return None
-    phone_patterns = r'\+62[\s-]?\62[/\s-]?\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b62[\s-]?\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b08\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b07\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}'
+    phone_patterns = r'\+62[\s-]?\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b62[\s-]?\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b08\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}|\b07\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4}'
     matches = re.findall(phone_patterns, str(text))
     return ', '.join([m.strip() for m in matches]) if matches else None
 
