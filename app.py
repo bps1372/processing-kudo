@@ -95,6 +95,7 @@ if menu == "1. Filter Kolom":
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
+            st.write(f"**Preview Data Asli** ({len(df)} baris):")
             st.dataframe(df.head())
             selected_columns = st.multiselect("Pilih kolom:", df.columns.tolist(), default=df.columns.tolist())
             if selected_columns:
@@ -102,7 +103,7 @@ if menu == "1. Filter Kolom":
                 st.download_button("Download Data (XLSX)", data=to_excel(df_filtered), file_name="data_filtered.xlsx")
 
 # ==========================================
-# MENU 2 (Diperbarui)
+# MENU 2
 # ==========================================
 elif menu == "2. Duplikasi Data":
     st.header("2. Cek & Hapus Baris Duplikat")
@@ -111,8 +112,7 @@ elif menu == "2. Duplikasi Data":
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
-            # Preview Data Awal
-            st.write("Preview Data Asli:")
+            st.write(f"**Preview Data Asli** ({len(df)} baris):")
             st.dataframe(df.head())
             
             dup_columns = st.multiselect("Pilih acuan kolom duplikat (Kosongkan jika ingin cek seluruh kolom):", df.columns.tolist())
@@ -120,15 +120,11 @@ elif menu == "2. Duplikasi Data":
             if st.button("Hapus Duplikat"):
                 subset = dup_columns if dup_columns else None
                 
-                # Mendapatkan data duplikat (baris yang dianggap kembar dan akan dibuang)
                 df_duplicates = df[df.duplicated(subset=subset, keep='first')]
-                
-                # Mendapatkan data bersih (tanpa duplikat)
                 df_clean = df.drop_duplicates(subset=subset, keep='first')
                 
                 st.success("Proses pengecekan duplikat selesai!")
                 
-                # Menampilkan Rekapitulasi Jumlah Data menggunakan st.metric
                 col1, col2, col3 = st.columns(3)
                 col1.metric("Total Data Raw", f"{len(df)} baris")
                 col2.metric("Data Duplikat", f"{len(df_duplicates)} baris")
@@ -136,7 +132,6 @@ elif menu == "2. Duplikasi Data":
                 
                 st.write("---")
                 
-                # Menampilkan 3 Tabel secara berdampingan menggunakan Tabs
                 tab1, tab2, tab3 = st.tabs(["Tabel Data Raw", "Tabel Data Duplikat", "Tabel Data Bersih"])
                 
                 with tab1:
@@ -155,7 +150,6 @@ elif menu == "2. Duplikasi Data":
                     st.dataframe(df_clean)
                 
                 st.write("---")
-                # Tombol Download untuk data bersih
                 st.download_button(
                     label="Download Data Bersih (XLSX)", 
                     data=to_excel(df_clean), 
@@ -164,7 +158,7 @@ elif menu == "2. Duplikasi Data":
                 )
 
 # ==========================================
-# MENU 3
+# MENU 3 (Diperbarui)
 # ==========================================
 elif menu == "3. Merge Data":
     st.header("3. Gabungkan Beberapa File")
@@ -172,15 +166,31 @@ elif menu == "3. Merge Data":
     if uploaded_files:
         if len(uploaded_files) > 15:
             st.error("Maksimal 15 file.")
-        elif st.button("Merge Sekarang"):
-            dfs = [load_data(f) for f in uploaded_files if load_data(f) is not None]
-            if dfs:
+        else:
+            st.write("### Preview File yang Diupload:")
+            dfs = []
+            
+            # Loop untuk preview masing-masing file
+            for f in uploaded_files:
+                df = load_data(f)
+                if df is not None:
+                    dfs.append(df)
+                    # Menggunakan expander agar UI tidak terlalu panjang
+                    with st.expander(f"📄 Preview: {f.name} ({len(df)} baris)"):
+                        st.dataframe(df.head())
+
+            st.write("---")
+            if dfs and st.button("Merge Sekarang"):
                 merged_df = pd.concat(dfs, ignore_index=True)
-                st.success(f"Berhasil! Total baris: {len(merged_df)}")
+                st.success(f"Berhasil! Total baris setelah di-merge: {len(merged_df)}")
+                
+                st.write("**Preview Data Hasil Merge:**")
+                st.dataframe(merged_df.head())
+                
                 st.download_button("Download Hasil Merge (XLSX)", data=to_excel(merged_df), file_name="data_merged.xlsx")
 
 # ==========================================
-# MENU 4
+# MENU 4 (Diperbarui)
 # ==========================================
 elif menu == "4. Ekstrak Nomor Telpon & Alamat":
     st.header("4. Ekstrak Nomor HP dan Alamat")
@@ -188,16 +198,23 @@ elif menu == "4. Ekstrak Nomor Telpon & Alamat":
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
+            # Preview Data Awal
+            st.write(f"**Preview Data Asli** ({len(df)} baris):")
+            st.dataframe(df.head())
+            st.write("---")
+            
             target_col = st.selectbox("Pilih kolom biografi/profil:", df.columns.tolist())
             if st.button("Ekstrak"):
                 df['nomor_hp'] = df[target_col].apply(extract_phone_number)
                 df['alamat'] = df[target_col].apply(extract_address)
                 st.success("Selesai!")
+                
+                st.write("**Preview Hasil Ekstraksi:**")
                 st.dataframe(df[[target_col, 'nomor_hp', 'alamat']].head())
                 st.download_button("Download Hasil Ekstrak (XLSX)", data=to_excel(df), file_name="data_extracted.xlsx")
 
 # ==========================================
-# MENU 5
+# MENU 5 (Diperbarui)
 # ==========================================
 elif menu == "5. Visualisasi Peta & Convert excel to shp":
     st.header("5. Visualisasi Data Peta & Export SHP")
@@ -207,6 +224,11 @@ elif menu == "5. Visualisasi Peta & Convert excel to shp":
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
+            # Preview Data Awal
+            st.write(f"**Preview Data Spasial** ({len(df)} baris):")
+            st.dataframe(df.head())
+            st.write("---")
+            
             all_columns = df.columns.tolist()
             
             # Baris 1: Pilihan Kordinat
