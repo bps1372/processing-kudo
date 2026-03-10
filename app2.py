@@ -91,7 +91,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 st.markdown("""
 <div class="pro-banner">
     <h1>KUDO Data Processing</h1>
-    <p>Professional Workspace for Data Engineering & Analytics</p>
+    <p>Alat untuk processing data hasil scraping</p>
 </div>
 """, unsafe_allow_html=True)
 
