@@ -194,7 +194,7 @@ menu = st.sidebar.radio(
      "8. Edit/Hapus Data (Dengan Filter)")
 )
 st.sidebar.markdown("---")
-st.sidebar.caption("© 2026 Data & Engineering Team")
+st.sidebar.caption("© 2026 BPS Kota Solok")
 
 # ==========================================
 # KONTEN BERDASARKAN MENU
