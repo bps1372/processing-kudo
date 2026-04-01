@@ -105,7 +105,7 @@ def extract_address_gmaps(text):
 # ==========================================
 st.sidebar.markdown("<h2>🟠 Menu KUDO</h2>", unsafe_allow_html=True)
 menu = st.sidebar.radio(
-    "Silakan Pilih Task:",
+    "Silakan Pilih Fitur yang digunakan:",
     ("1. Filter Kolom", "2. Duplikasi Data", "3. Merge Data", 
      "4. Ekstrak No Telp & Alamat (Instagram)", "5. Ekstrak Alamat (Google Maps)",
      "6. Visualisasi Peta & Convert excel to shp", "7. Cek Info & Tipe Data", "8. Edit/Hapus Data")
@@ -118,12 +118,12 @@ st.sidebar.caption("© 2026 BPS Kota Solok")
 # ==========================================
 
 if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
-    st.header("4. Ekstrak Nomor HP dan Alamat (Instagram)")
+    st.header("4. Ekstrak  Nomor HP dan Alamat (Instagram)")
     
     # 1. Pilih Wilayah DULUAN
     st.subheader("Langkah 1: Tentukan Wilayah Default")
     region_choice = st.selectbox(
-        "Pilih Wilayah (Akan digunakan jika detail jalan tidak ditemukan dalam bio):", 
+        "Pilih Wilayah (Akan digunakan jika detail informasi alamat tidak ditemukan dalam bio instagram, otomatis ditulis berdasarkan wilayah dipilih):", 
         ("Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", "Kota Payakumbuh", "Kota Padang Panjang",
         "Kabupaten Agam", "Kabupaten Dharmasraya","Kabupaten Kepulauan Mentawai", "Kabupaten Lima Puluh Kota","Kabupaten Padang Pariaman",
         "Kabupaten Pasaman", "Kabupaten Pasaman Barat", "Kabupaten Pesisir Selatan", "Kabupaten Sijunjung", "Kabupaten Solok", "Kabupaten Solok Selatan",
@@ -134,14 +134,14 @@ if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
     
     # 2. Baru Upload File
     st.subheader("Langkah 2: Upload Data")
-    uploaded_file = st.file_uploader("Upload file hasil scraping", type=['csv', 'xlsx', 'json'], key='m4')
+    uploaded_file = st.file_uploader("Upload file hasil scraping instagram", type=['csv', 'xlsx', 'json'], key='m4')
     
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
             st.info(f"Wilayah yang dipilih: **{region_choice}**")
             
-            target_col = st.selectbox("Pilih kolom biografi/profil:", df.columns.tolist())
+            target_col = st.selectbox("Pilih kolom berisi biografi profil instagram (alamat dan nomor hp):", df.columns.tolist())
             
             if st.button("Mulai Ekstrak Data"):
                 with st.spinner('Sedang memproses data...'):
@@ -167,7 +167,7 @@ elif menu == "1. Filter Kolom":
                 st.download_button("📥 Download (XLSX)", data=to_excel(df[selected_columns]), file_name="filtered.xlsx")
 
 elif menu == "2. Duplikasi Data":
-    st.header("2. Cek & Hapus Baris Duplikat")
+    st.header("2. Cek & Hapus Baris Duplikat Data")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m2')
     if uploaded_file:
         df = load_data(uploaded_file)
