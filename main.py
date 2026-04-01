@@ -146,7 +146,7 @@ def extract_phone_number(text):
     return ', '.join([m.strip() for m in matches]) if matches else None
 
 # FUNGSI YANG DIPERBARUI: Menerima default_region dari pilihan user
-def extract_address_ig(text, default_region='Kota Solok'):
+def extract_address_ig(text, default_region=region_choice):
     if pd.isna(text):
         return default_region
     bio_str = str(text)
