@@ -119,7 +119,8 @@ st.sidebar.caption("© 2026 BPS Kota Solok")
 
 if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
     st.header("4. Ekstrak  Nomor HP dan Alamat (Instagram)")
-    
+    st.subheader("Melakukan Ekstraksi informasi nomor hp dan alamat yang ada pada bio profil akun instagram ke kolom nomor hp dan kolom alamat ")
+    st.subheader("")
     # 1. Pilih Wilayah DULUAN
     st.subheader("Langkah 1: Tentukan Wilayah Default")
     region_choice = st.selectbox(
@@ -158,6 +159,7 @@ if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
 # --- Sisanya (Menu 1, 2, 3, 5, 6, 7, 8) tetap sama seperti sebelumnya ---
 elif menu == "1. Filter Kolom":
     st.header("1. Filter Kolom Tertentu")
+    st.subheader("Melakukan filter kolom tertentu, sehingga hanya download data dengan kolom yang dipilih saja")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m1')
     if uploaded_file:
         df = load_data(uploaded_file)
@@ -168,6 +170,7 @@ elif menu == "1. Filter Kolom":
 
 elif menu == "2. Duplikasi Data":
     st.header("2. Cek & Hapus Baris Duplikat Data")
+    st.subheader("Melakukan pengecekan baris data duplikat berdasarkan kolom tertentu")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m2')
     if uploaded_file:
         df = load_data(uploaded_file)
@@ -180,6 +183,8 @@ elif menu == "2. Duplikasi Data":
 
 elif menu == "5. Ekstrak Alamat (Google Maps)":
     st.header("5. Ekstrak Alamat Saja (Google Maps)")
+    st.subheader("Melakukan ekstrak informasi alamat dari data scraping google Maps")
+    st.subheader("Contoh: 6M64+C8Q, Jl. Sutan Sjahrir >> menjadi >> Jl. Sutan Sjahrir")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m5')
     if uploaded_file:
         df = load_data(uploaded_file)
@@ -193,6 +198,7 @@ elif menu == "5. Ekstrak Alamat (Google Maps)":
 
 elif menu == "6. Visualisasi Peta & Convert excel to shp":
     st.header("6. Visualisasi Peta & Export Shapefile")
+    st.subheader("Melakukan Visualisasi Peta dari data hasil sraping Google Maps dan bisa export ke format file shp (shapefile) untuk kebutuhan peta")
     uploaded_file = st.file_uploader("Upload file data spasial", type=['csv', 'xlsx', 'json'], key='m6')
     if uploaded_file:
         df = load_data(uploaded_file)
@@ -210,6 +216,7 @@ elif menu == "6. Visualisasi Peta & Convert excel to shp":
 
 elif menu == "7. Cek Info & Tipe Data":
     st.header("7. Cek Nama Kolom dan Tipe Datanya")
+    st.subheader("Melakukan pengecekan nama kolom beserta tipe data dan informasi data bernilai kosong")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m7')
     if uploaded_file:
         df = load_data(uploaded_file)
@@ -218,6 +225,7 @@ elif menu == "7. Cek Info & Tipe Data":
 
 elif menu == "8. Edit/Hapus Data":
     st.header("8. Workspace Edit Data")
+    st.subheader("Melakukan pengeditan data tertentu, menghapus kolom, serta mengubah nama kolom")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
     if uploaded_file:
         df = load_data(uploaded_file)
