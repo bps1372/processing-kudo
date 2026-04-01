@@ -232,3 +232,26 @@ elif menu == "8. Edit/Hapus Data":
         if df is not None:
             edited_df = st.data_editor(df, num_rows="dynamic")
             st.download_button("📥 Download (XLSX)", data=to_excel(edited_df), file_name="edited.xlsx")
+
+elif menu == "3. Merge Data":
+    st.header("3. Gabungkan Beberapa File")
+    st.write("Merge/ mengabungkan beberapa file format sama menjadi satu file")
+    uploaded_files = st.file_uploader("Upload file (Maks 15)", type=['csv', 'xlsx', 'json'], accept_multiple_files=True, key='m3')
+    if uploaded_files:
+        if len(uploaded_files) > 15:
+            st.error("Maksimal 15 file.")
+        else:
+            dfs = []
+            for f in uploaded_files:
+                df = load_data(f)
+                if df is not None:
+                    dfs.append(df)
+                    with st.expander(f"📄 Preview: {f.name} ({len(df)} baris)"):
+                        st.dataframe(df.head())
+
+            if dfs and st.button("Merge Sekarang"):
+                merged_df = pd.concat(dfs, ignore_index=True)
+                st.success(f"Berhasil! Total baris setelah di-merge: {len(merged_df)}")
+                st.dataframe(merged_df.head())
+                st.download_button("📥 Download Hasil Merge (XLSX)", data=to_excel(merged_df), file_name="data_merged.xlsx")
+
