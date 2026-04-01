@@ -124,7 +124,10 @@ if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
     st.subheader("Langkah 1: Tentukan Wilayah Default")
     region_choice = st.selectbox(
         "Pilih Wilayah (Akan digunakan jika detail jalan tidak ditemukan dalam bio):", 
-        ("Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", "Kota Payakumbuh", "Kota Padang Panjang")
+        ("Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", "Kota Payakumbuh", "Kota Padang Panjang",
+        "Kabupaten Agam", "Kabupaten Dharmasraya","Kabupaten Kepulauan Mentawai", "Kabupaten Lima Puluh Kota","Kabupaten Padang Pariaman",
+        "Kabupaten Pasaman", "Kabupaten Pasaman Barat", "Kabupaten Pesisir Selatan", "Kabupaten Sijunjung", "Kabupaten Solok", "Kabupaten Solok Selatan",
+        "Kabupaten Tanah Datar")
     )
     
     st.write("---")
