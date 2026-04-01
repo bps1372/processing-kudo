@@ -267,7 +267,7 @@ elif menu == "4. Ekstrak No Telp & Alamat (Instagram)":
             with col2:
                 region_choice = st.selectbox(
                     "Pilih Wilayah Default (Fallback):", 
-                    ("Kota Solok", "Kota Padang", "Kota Bukittinggi")
+                    ("Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", "Kota Payakumbuh","Kota Padang Panjang")
                 )
             
             if st.button("Ekstrak Data Instagram"):
