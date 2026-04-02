@@ -160,14 +160,18 @@ if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
 elif menu == "1. Filter Kolom":
     st.header("1. Filter Kolom Tertentu")
     st.write("Melakukan filter kolom tertentu, sehingga hanya download data dengan kolom yang dipilih saja")
-    uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m1')
+
+    uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m1')
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
+            st.write(f"**Preview Data Asli** ({len(df)} baris):")
+            st.dataframe(df.head())
             selected_columns = st.multiselect("Pilih kolom:", df.columns.tolist(), default=df.columns.tolist())
             if selected_columns:
-                st.download_button("📥 Download (XLSX)", data=to_excel(df[selected_columns]), file_name="filtered.xlsx")
-
+                df_filtered = df[selected_columns]
+                st.download_button("📥 Download Data (XLSX)", data=to_excel(df_filtered), file_name="data_filtered.xlsx")
+                
 elif menu == "2. Duplikasi Data":
     st.header("2. Cek & Hapus Baris Duplikat Data")
     st.write("Melakukan pengecekan baris data duplikat berdasarkan kolom tertentu")
