@@ -315,6 +315,7 @@ elif menu == "6. Visualisasi Peta & Convert excel to shp":
 
 elif menu == "7. Cek Info & Tipe Data":
     st.header("7. Cek Nama Kolom dan Tipe Datanya")
+    st.write("Melakukan pengecekan nama kolom beserta tipe data dan informasi data bernilai kosong")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m7')
     
     if uploaded_file:
@@ -336,6 +337,7 @@ elif menu == "7. Cek Info & Tipe Data":
 
 elif menu == "8. Edit/Hapus Data":
     st.header("8. Workspace Edit Data")
+    st.write("Melakukan pengeditan data tertentu, menghapus kolom, serta mengubah nama kolom")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
     
     if uploaded_file:
@@ -399,7 +401,7 @@ elif menu == "8. Edit/Hapus Data":
             )
 elif menu == "3. Merge Data":
     st.header("3. Gabungkan Beberapa File")
-    st.write("Merge/ mengabungkan beberapa file format sama menjadi satu file")
+    st.write("Mengabungkan beberapa file format sama menjadi satu file")
     uploaded_files = st.file_uploader("Upload file (Maks 15)", type=['csv', 'xlsx', 'json'], accept_multiple_files=True, key='m3')
     if uploaded_files:
         if len(uploaded_files) > 15:
