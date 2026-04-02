@@ -232,8 +232,6 @@ elif menu == "5. Ekstrak Alamat (Google Maps)":
 elif menu == "6. Visualisasi Peta & Convert excel to shp":
     st.header("6. Visualisasi Peta & Export Shapefile")
     st.write("Melakukan Visualisasi Peta dari data hasil scraping Google Maps dan bisa export ke format file shp (shapefile) untuk kebutuhan peta")
-elif menu == "6. Visualisasi Peta & Convert excel to shp":
-    st.header("6. Visualisasi Peta & Export Shapefile")
     
     uploaded_file = st.file_uploader("Upload file data spasial", type=['csv', 'xlsx', 'json'], key='m6')
     
