@@ -171,15 +171,48 @@ elif menu == "1. Filter Kolom":
 elif menu == "2. Duplikasi Data":
     st.header("2. Cek & Hapus Baris Duplikat Data")
     st.write("Melakukan pengecekan baris data duplikat berdasarkan kolom tertentu")
-    uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m2')
+    uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m2')
+    
     if uploaded_file:
         df = load_data(uploaded_file)
         if df is not None:
-            dup_cols = st.multiselect("Acuan kolom duplikat:", df.columns.tolist())
+            st.write(f"**Preview Data Asli** ({len(df)} baris):")
+            st.dataframe(df.head())
+            
+            dup_columns = st.multiselect("Pilih acuan kolom duplikat (Kosongkan jika ingin cek seluruh kolom):", df.columns.tolist())
+            
             if st.button("Hapus Duplikat"):
-                df_clean = df.drop_duplicates(subset=dup_cols if dup_cols else None)
-                st.success(f"Berhasil dihapus. Sisa data: {len(df_clean)} baris")
-                st.download_button("📥 Download (XLSX)", data=to_excel(df_clean), file_name="cleaned.xlsx")
+                subset = dup_columns if dup_columns else None
+                df_duplicates = df[df.duplicated(subset=subset, keep='first')]
+                df_clean = df.drop_duplicates(subset=subset, keep='first')
+                
+                st.success("Proses pengecekan duplikat selesai!")
+                
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Total Data Raw", f"{len(df)} baris")
+                col2.metric("Data Duplikat", f"{len(df_duplicates)} baris")
+                col3.metric("Data Bersih", f"{len(df_clean)} baris")
+                
+                st.write("---")
+                tab1, tab2, tab3 = st.tabs(["Tabel Data Raw", "Tabel Data Duplikat", "Tabel Data Bersih"])
+                
+                with tab1:
+                    st.dataframe(df)
+                with tab2:
+                    if len(df_duplicates) > 0:
+                        st.dataframe(df_duplicates)
+                    else:
+                        st.info("Tidak ada data duplikat yang ditemukan.")
+                with tab3:
+                    st.dataframe(df_clean)
+                
+                st.write("---")
+                st.download_button(
+                    label="📥 Download Data Bersih (XLSX)", 
+                    data=to_excel(df_clean), 
+                    file_name="data_clean_dedup.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
 
 elif menu == "5. Ekstrak Alamat (Google Maps)":
     st.header("5. Ekstrak Alamat Saja (Google Maps)")
