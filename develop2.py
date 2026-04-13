@@ -377,60 +377,60 @@ elif st.session_state['app_mode'] == 'feature_active':
                 st.dataframe(info_df, use_container_width=True)
 
     elif selected_menu == "8. Edit/Hapus Data":
-    uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
-    
-    if uploaded_file:
-        df = load_data(uploaded_file)
+        uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
         
-        if df is not None:
-            if 'edit_df' not in st.session_state or st.session_state.get('last_uploaded') != uploaded_file.name:
-                st.session_state['edit_df'] = df.copy()
-                st.session_state['last_uploaded'] = uploaded_file.name
-                
-            st.write("---")
+        if uploaded_file:
+            df = load_data(uploaded_file)
             
-            with st.expander("✏️ Ganti Nama Kolom"):
-                col1, col2 = st.columns(2)
-                with col1:
-                    old_col = st.selectbox("Pilih kolom:", st.session_state['edit_df'].columns, key="old_col")
-                with col2:
-                    new_col = st.text_input("Nama kolom baru:", value=old_col)
+            if df is not None:
+                if 'edit_df' not in st.session_state or st.session_state.get('last_uploaded') != uploaded_file.name:
+                    st.session_state['edit_df'] = df.copy()
+                    st.session_state['last_uploaded'] = uploaded_file.name
                     
-                if st.button("Ubah Nama Kolom"):
-                    if new_col and new_col != old_col:
-                        st.session_state['edit_df'].rename(columns={old_col: new_col}, inplace=True)
-                        st.success(f"Kolom berhasil diubah dari '{old_col}' menjadi '{new_col}'")
-                        st.rerun()
-            
-            with st.expander("🗑️ Hapus Kolom (Drop Column)"):
-                cols_to_drop = st.multiselect("Pilih kolom yang tidak digunakan:", st.session_state['edit_df'].columns)
-                if st.button("Hapus Kolom Terpilih"):
-                    if cols_to_drop:
-                        st.session_state['edit_df'].drop(columns=cols_to_drop, inplace=True)
-                        st.success(f"{len(cols_to_drop)} kolom berhasil dihapus.")
-                        st.rerun()
-
-            st.write("---")
-            st.write("### 🔍 Filter & Editor Data Pintar")
-            st.info("💡 **Tips:** Klik 2x pada cell tabel untuk mengedit teks. Centang kotak paling kiri lalu tekan **Delete** di keyboard untuk menghapus baris.")
-            
-            search_query = st.text_input("Ketik kata kunci untuk memfilter baris:")
-            
-            if search_query:
-                mask = st.session_state['edit_df'].astype(str).apply(
-                    lambda x: x.str.contains(search_query, case=False, na=False)
-                ).any(axis=1)
-                display_df = st.session_state['edit_df'][mask]
-                st.caption(f"Menampilkan {len(display_df)} baris yang cocok dengan '{search_query}'.")
-            else:
-                display_df = st.session_state['edit_df']
-            
-            edited_df = st.data_editor(
-                display_df,
-                num_rows="dynamic",
-                use_container_width=True,
-                key="editor"
-            )
+                st.write("---")
+                
+                with st.expander("✏️ Ganti Nama Kolom"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        old_col = st.selectbox("Pilih kolom:", st.session_state['edit_df'].columns, key="old_col")
+                    with col2:
+                        new_col = st.text_input("Nama kolom baru:", value=old_col)
+                        
+                    if st.button("Ubah Nama Kolom"):
+                        if new_col and new_col != old_col:
+                            st.session_state['edit_df'].rename(columns={old_col: new_col}, inplace=True)
+                            st.success(f"Kolom berhasil diubah dari '{old_col}' menjadi '{new_col}'")
+                            st.rerun()
+                
+                with st.expander("🗑️ Hapus Kolom (Drop Column)"):
+                    cols_to_drop = st.multiselect("Pilih kolom yang tidak digunakan:", st.session_state['edit_df'].columns)
+                    if st.button("Hapus Kolom Terpilih"):
+                        if cols_to_drop:
+                            st.session_state['edit_df'].drop(columns=cols_to_drop, inplace=True)
+                            st.success(f"{len(cols_to_drop)} kolom berhasil dihapus.")
+                            st.rerun()
+    
+                st.write("---")
+                st.write("### 🔍 Filter & Editor Data Pintar")
+                st.info("💡 **Tips:** Klik 2x pada cell tabel untuk mengedit teks. Centang kotak paling kiri lalu tekan **Delete** di keyboard untuk menghapus baris.")
+                
+                search_query = st.text_input("Ketik kata kunci untuk memfilter baris:")
+                
+                if search_query:
+                    mask = st.session_state['edit_df'].astype(str).apply(
+                        lambda x: x.str.contains(search_query, case=False, na=False)
+                    ).any(axis=1)
+                    display_df = st.session_state['edit_df'][mask]
+                    st.caption(f"Menampilkan {len(display_df)} baris yang cocok dengan '{search_query}'.")
+                else:
+                    display_df = st.session_state['edit_df']
+                
+                edited_df = st.data_editor(
+                    display_df,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key="editor"
+                )
             
             st.write("---")
             st.download_button(
