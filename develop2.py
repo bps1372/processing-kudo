@@ -328,7 +328,7 @@ elif st.session_state['app_mode'] == 'feature_active':
                         df['nomor_hp'] = df[target_col].apply(extract_phone_number)
                         df['alamat_ig'] = df[target_col].apply(lambda x: extract_address_ig(x, st.session_state['selected_region']))
                     st.success("Selesai!")
-                    st.dataframe(df[[target_col, 'nomor_hp', 'alamat_ig']].head(10))
+                    st.dataframe(df[[target_col, 'nomor_hp', 'alamat_ig']].head(30))
                     st.download_button("📥 Download (XLSX)", data=to_excel(df), file_name="hasil_ekstrak_ig.xlsx")
 
     elif selected_menu == "5. Ekstrak Alamat (Google Maps)":
