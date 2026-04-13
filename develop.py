@@ -15,9 +15,17 @@ from streamlit_folium import st_folium
 # ==========================================
 st.set_page_config(page_title="KUDO Data Processing", page_icon="🟠", layout="wide")
 
-# Custom CSS untuk tampilan Dashboard & Welcome
+# Custom CSS untuk tampilan Dashboard & Menyembunyikan Sidebar
 st.markdown("""
 <style>
+    /* Menyembunyikan Sidebar secara permanen */
+    [data-testid="stSidebar"] {
+        display: none;
+    }
+    [data-testid="collapsedControl"] {
+        display: none;
+    }
+    
     /* Styling Dasar */
     .stApp { background-color: #0e1117; }
     h1, h2, h3 { color: #FF7A00 !important; }
@@ -33,7 +41,7 @@ st.markdown("""
         box-shadow: 0 10px 30px rgba(255, 122, 0, 0.2);
     }
     
-    /* Tombol Navigasi */
+    /* Tombol Navigasi Dashboard */
     div.stButton > button {
         background-color: #FF7A00;
         color: white;
@@ -43,6 +51,7 @@ st.markdown("""
         border: none;
         width: 100%;
         transition: 0.3s;
+        min-height: 100px;
     }
     div.stButton > button:hover {
         background-color: #e66e00;
@@ -190,17 +199,17 @@ elif st.session_state.page == 'dashboard':
         st.markdown("<div class='menu-label'>7. Cek Tipe Data</div>", unsafe_allow_html=True)
 
     with col3:
-        if st.button("🎧\n\nHeadsets"): st.session_state.page = 'm6'; st.rerun()
+        if st.button("🎧\n\nVisualisasi Peta"): st.session_state.page = 'm6'; st.rerun()
         st.markdown("<div class='menu-label'>6. Visualisasi Peta</div>", unsafe_allow_html=True)
         
-        if st.button("🖱️\n\nMouse"): st.session_state.page = 'm8'; st.rerun()
+        if st.button("🖱️\n\nEdit/Workspace"): st.session_state.page = 'm8'; st.rerun()
         st.markdown("<div class='menu-label'>8. Edit/Workspace</div>", unsafe_allow_html=True)
         
         if st.button("🔄\n\nGanti Wilayah"): st.session_state.page = 'region_selection'; st.rerun()
         st.markdown("<div class='menu-label'>Reset Wilayah</div>", unsafe_allow_html=True)
 
 # ==========================================
-# LOGIKA FITUR (SETIAP MENU)
+# LOGIKA FITUR
 # ==========================================
 
 def back_btn():
@@ -237,7 +246,7 @@ elif st.session_state.page == 'm3':
     back_btn()
     files = st.file_uploader("Upload file (Maks 15)", accept_multiple_files=True)
     if files:
-        dfs = [load_data(f) for f in files]
+        dfs = [load_data(f) for f in files if load_data(f) is not None]
         if st.button("Gabungkan Sekarang"):
             merged = pd.concat(dfs, ignore_index=True)
             st.write(f"Total baris: {len(merged)}")
@@ -306,4 +315,6 @@ elif st.session_state.page == 'm8':
         edited_df = st.data_editor(df)
         st.download_button("📥 Simpan Perubahan", data=to_excel(edited_df), file_name="edited.xlsx")
 
-st.sidebar.caption("© 2026 BPS Kota Solok - KUDO v2.0")
+# Footnote di area utama (sebagai ganti sidebar)
+st.markdown("---")
+st.caption("© 2026 BPS Kota Solok - KUDO v2.0")
