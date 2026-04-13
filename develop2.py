@@ -377,7 +377,6 @@ elif st.session_state['app_mode'] == 'feature_active':
                 st.dataframe(info_df, use_container_width=True)
 
     elif selected_menu == "8. Edit/Hapus Data":
-    st.header("8. Workspace Edit Data")
     uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
     
     if uploaded_file:
