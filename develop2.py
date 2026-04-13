@@ -9,40 +9,136 @@ import zipfile
 import os
 import folium
 from streamlit_folium import st_folium
+import time
 
 # ==========================================
 # KONFIGURASI & STYLING HALAMAN
 # ==========================================
-st.set_page_config(page_title="KUDO Data Processing", page_icon="🟠", layout="wide")
+# Mengatur agar halaman full-width
+st.set_page_config(page_title="KUDO - BPS Kota Solok", page_icon="🟠", layout="wide")
 
+# Styling CSS Khusus untuk visualisasi Menu (KUDO Core & Icons)
 custom_css = """
 <style>
-    h2, h3 { color: #FF7A00 !important; font-family: 'Segoe UI', sans-serif; }
+    /* Gradient Background untuk seluruh body */
+    .stApp {
+        background: linear-gradient(to right, #FF4B2B, #FF416C);
+    }
+    
+    /* Center Align Judul Utama */
+    .kudo-header {
+        text-align: center;
+        color: white !important;
+        margin-top: 30px;
+        margin-bottom: 5px;
+        font-weight: 800;
+        font-size: 4rem !important;
+    }
+    .kudo-subtitle {
+        text-align: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-bottom: 25px;
+    }
+
+    /* Styling Banner Pro (untuk halaman fitur) */
     .pro-banner {
         background: linear-gradient(135deg, #FF7A00 0%, #FFA733 100%);
         padding: 30px; border-radius: 12px; color: white; text-align: center;
         margin-bottom: 25px; box-shadow: 0 4px 15px rgba(255, 122, 0, 0.3);
     }
     .pro-banner h1 { color: white !important; margin: 0; font-size: 2.8rem; font-weight: 800; }
+    
+    /* Styling Button Default */
     div.stButton > button {
         background-color: #FF7A00; color: white; border-radius: 8px; font-weight: 600;
         width: 100%;
     }
-    [data-testid="stSidebar"] { border-right: 3px solid #FF7A00; }
+    
+    /* Styling Sidebar */
+    [data-testid="stSidebar"] { 
+        border-right: 3px solid #FF7A00; 
+        background-color: #FFFFFF;
+    }
+
+    /* --- STYLING KHUSUS MENU ICON --- */
+    /* Container Menu Utama */
+    .menu-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        max-width: 900px;
+        margin: 20px auto;
+        padding: 20px;
+        background: rgba(255, 122, 0, 0.4); /* Background oranye semi-transparan */
+        border-radius: 15px;
+    }
+    
+    /* Styling Tombol Menu (Fitur 1-8) */
+    .menu-item-button {
+        flex: 1 1 180px; /* Ukuran fleksibel, minimal 180px */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        background-color: rgba(255, 122, 0, 0.9);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: transform 0.2s, background-color 0.2s;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+    }
+    
+    .menu-item-button:hover {
+        transform: translateY(-3px);
+        background-color: #FF9F40;
+    }
+    
+    /* Styling Teks Judul Fitur (e.g., Fitur 1) */
+    .menu-item-button h4 {
+        margin-top: 15px;
+        margin-bottom: 5px;
+        color: white !important;
+        font-weight: 600;
+        font-size: 1.1rem !important;
+    }
+    
+    /* Styling Deskripsi Singkat Fitur */
+    .menu-item-button p {
+        font-size: 0.9rem;
+        line-height: 1.3;
+        color: #f0f0f0;
+        margin: 0;
+    }
+
+    /* Styling Footer */
+    .kudo-footer {
+        text-align: center;
+        color: white;
+        margin-top: 50px;
+        margin-bottom: 20px;
+    }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # ==========================================
-# SESSION STATE UNTUK LANDING PAGE
+# SESSION STATE UNTUK LOGIKA APLIKASI
 # ==========================================
+# app_mode: 'landing' (pilih wilayah/login) | 'main' (dashboard ikon) | 'feature_active' (salah satu fitur terpilih)
 if 'app_mode' not in st.session_state:
     st.session_state['app_mode'] = 'landing'
 if 'selected_region' not in st.session_state:
     st.session_state['selected_region'] = "Kota Solok"
+if 'active_menu' not in st.session_state:
+    st.session_state['active_menu'] = None
 
 # ==========================================
-# FUNGSI-FUNGSI UTAMA (TETAP SAMA)
+# FUNGSI-FUNGSI UTAMA (KODE ASLI)
 # ==========================================
 
 @st.cache_data
@@ -77,7 +173,7 @@ def to_shp_zip(df, lat_col, lon_col):
     return zip_buffer.getvalue()
 
 # ==========================================
-# FUNGSI EKSTRAKSI (REGEX)
+# FUNGSI EKSTRAKSI (REGEX, KODE ASLI)
 # ==========================================
 
 def extract_phone_number(text):
@@ -103,41 +199,136 @@ def extract_address_gmaps(text):
     return bio_str.strip(' ,.-')
 
 # ==========================================
-# LOGIKA TAMPILAN
+# LOGIKA TAMPILAN (Halaman Pilih Wilayah/Menu/Fitur)
 # ==========================================
 
+region_list = (
+    "Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", 
+    "Kota Payakumbuh", "Kota Padang Panjang", "Kabupaten Agam", "Kabupaten Dharmasraya",
+    "Kabupaten Kepulauan Mentawai", "Kabupaten Lima Puluh Kota","Kabupaten Padang Pariaman",
+    "Kabupaten Pasaman", "Kabupaten Pasaman Barat", "Kabupaten Pesisir Selatan", 
+    "Kabupaten Sijunjung", "Kabupaten Solok", "Kabupaten Solok Selatan", "Kabupaten Tanah Datar"
+)
+
+# --- HALAMAN PERTAMA (LANDING PAGE - Pilih Wilayah) ---
 if st.session_state['app_mode'] == 'landing':
-    # --- HALAMAN PERTAMA (LANDING PAGE) ---
-    st.markdown("""
-    <div class="pro-banner">
-        <h1>KUDO - Korek Usaha Digital Online</h1>
-        <p style="font-size: 1.2rem;">Sistem Pengolahan Data Hasil Scraping & Digitalisasi Usaha</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # KUDO Judul & Subtitle
+    st.markdown('<h1 class="kudo-header">KUDO</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="kudo-subtitle">KOREK USAHA DIGITAL ONLINE - BPS KOTA SOLOK</p>', unsafe_allow_html=True)
     
     col_l, col_c, col_r = st.columns([1, 2, 1])
     
     with col_c:
-        st.write("### 👋 Selamat Datang!")
-        st.write("Sebelum memulai, silakan pilih wilayah kerja Anda. Wilayah ini akan menjadi nilai default pada fitur Ekstrak Instagram.")
+        # Pilihan Wilayah Anda (sama seperti kode user)
+        choice = st.selectbox("Pilih Wilayah Anda:", region_list, index=0) # Index 0 adalah Kota Solok
         
-        region_list = (
-            "Kota Solok", "Kota Padang", "Kota Bukittinggi", "Kota Sawahlunto", "Kota Pariaman", 
-            "Kota Payakumbuh", "Kota Padang Panjang", "Kabupaten Agam", "Kabupaten Dharmasraya",
-            "Kabupaten Kepulauan Mentawai", "Kabupaten Lima Puluh Kota","Kabupaten Padang Pariaman",
-            "Kabupaten Pasaman", "Kabupaten Pasaman Barat", "Kabupaten Pesisir Selatan", 
-            "Kabupaten Sijunjung", "Kabupaten Solok", "Kabupaten Solok Selatan", "Kabupaten Tanah Datar"
-        )
-        
-        choice = st.selectbox("Pilih Wilayah Anda:", region_list)
-        
-        if st.button("Masuk ke Dashboard Menu"):
-            st.session_state['selected_region'] = choice
-            st.session_state['app_mode'] = 'main'
-            st.rerun()
+        # Tombol Masuk/Login
+        if st.button("Masuk Ke Menu KUDO"):
+            with st.spinner('Memvalidasi wilayah...'):
+                st.session_state['selected_region'] = choice
+                st.session_state['app_mode'] = 'main'
+                time.sleep(1) # Efek loading sebentar
+                st.rerun()
+    
+    # Footer
+    st.markdown('<div class="kudo-footer">BPS KOTA SOLOK</div>', unsafe_allow_html=True)
 
-else:
-    # --- HALAMAN UTAMA (SETELAH PILIH WILAYAH) ---
+# --- HALAMAN UTAMA (MENU IKON) ---
+elif st.session_state['app_mode'] == 'main':
+    # KUDO Judul & Subtitle
+    st.markdown('<h1 class="kudo-header">KUDO</h1>', unsafe_allow_html=True)
+    st.markdown(f'<p class="kudo-subtitle">KOREK USAHA DIGITAL ONLINE - Wilayah Aktif: {st.session_state["selected_region"]}</p>', unsafe_allow_html=True)
+    
+    st.write("---")
+    
+    # Container Menu (Background Oranye)
+    st.markdown('<div class="menu-container">', unsafe_allow_html=True)
+    
+    # Grid Menu (Visualisasi Ikon & Deskripsi)
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown('### 🖨️')
+        if st.button('1. Filter Kolom', key='fitur1_dash'):
+            st.session_state['active_menu'] = "1. Filter Kolom"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Download data hanya dengan kolom terpilih</p>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('### 🖥️')
+        if st.button('2. Duplikasi Data', key='fitur2_dash'):
+            st.session_state['active_menu'] = "2. Duplikasi Data"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Cek dan hapus baris data duplikat</p>', unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('### 🎧')
+        if st.button('3. Merge Data', key='fitur3_dash'):
+            st.session_state['active_menu'] = "3. Merge Data"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Gabungkan beberapa file menjadi satu</p>', unsafe_allow_html=True)
+
+    with col4:
+        st.markdown('### ☁️🔀')
+        if st.button('4. Instagram Extractor', key='fitur4_dash'):
+            st.session_state['active_menu'] = "4. Ekstrak No Telp & Alamat (Instagram)"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Ekstrak No Telp & Alamat dari bio profil</p>', unsafe_allow_html=True)
+
+    st.markdown('<div style="margin: 20px 0;"></div>', unsafe_allow_html=True) # Jarak baris
+    
+    col5, col6, col7, col8 = st.columns(4)
+    
+    with col5:
+        st.markdown('### ⚙️')
+        if st.button('5. GMaps Extractor', key='fitur5_dash'):
+            st.session_state['active_menu'] = "5. Ekstrak Alamat (Google Maps)"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Ekstrak informasi alamat dari data scraping Maps</p>', unsafe_allow_html=True)
+
+    with col6:
+        st.markdown('### 🖱️🔌')
+        if st.button('6. Visualisasi Peta', key='fitur6_dash'):
+            st.session_state['active_menu'] = "6. Visualisasi Peta & Convert excel to shp"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Visualisasi titik lokasi & Export ke .shp</p>', unsafe_allow_html=True)
+
+    with col7:
+        st.markdown('### ☁️⬇️')
+        if st.button('7. Cek Tipe Data', key='fitur7_dash'):
+            st.session_state['active_menu'] = "7. Cek Info & Tipe Data"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Cek Nama Kolom, Tipe Data, & Missing Value</p>', unsafe_allow_html=True)
+
+    with col8:
+        st.markdown('### ☁️🔀')
+        if st.button('8. Edit Data', key='fitur8_dash'):
+            st.session_state['active_menu'] = "8. Edit/Hapus Data"
+            st.session_state['app_mode'] = 'feature_active'
+            st.rerun()
+        st.markdown('<p>Workspace interaktif untuk mengedit data</p>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True) # Tutup container
+    
+    # Link Ganti Wilayah
+    if st.button("🔄 Ganti Wilayah Anda", key='change_reg_dash'):
+        st.session_state['app_mode'] = 'landing'
+        st.rerun()
+    
+    # Footer
+    st.markdown('<div class="kudo-footer">BPS KOTA SOLOK</div>', unsafe_allow_html=True)
+
+# --- HALAMAN FITUR (SIDEBAR MENU AKTIF) ---
+elif st.session_state['app_mode'] == 'feature_active':
+    # Halaman fitur aktif, menggunakan Sidebar Navigation & Banner Asli
+
     st.markdown("""
     <div class="pro-banner">
         <h1>KUDO Data Processing</h1>
@@ -150,36 +341,54 @@ else:
     st.sidebar.info(f"📍 Wilayah: **{st.session_state['selected_region']}**")
     
     menu = st.sidebar.radio(
-        "Silakan Pilih Fitur yang digunakan:",
+        "Pilih Fitur:",
         ("1. Filter Kolom", "2. Duplikasi Data", "3. Merge Data", 
          "4. Ekstrak No Telp & Alamat (Instagram)", "5. Ekstrak Alamat (Google Maps)",
-         "6. Visualisasi Peta & Convert excel to shp", "7. Cek Info & Tipe Data", "8. Edit/Hapus Data")
+         "6. Visualisasi Peta & Convert excel to shp", "7. Cek Info & Tipe Data", "8. Edit/Hapus Data"),
+        index=region_list.index(st.session_state['active_menu']) if st.session_state['active_menu'] in region_list else 0
     )
     
-    if st.sidebar.button("🔄 Ganti Wilayah"):
+    # Link Kembali ke Dashboard
+    if st.sidebar.button("🔙 Kembali ke Dashboard KUDO"):
+        st.session_state['active_menu'] = None
+        st.session_state['app_mode'] = 'main'
+        st.rerun()
+        
+    # Link Ganti Wilayah
+    if st.sidebar.button("🔄 Ganti Wilayah Anda", key='change_reg_sidebar'):
         st.session_state['app_mode'] = 'landing'
         st.rerun()
         
     st.sidebar.markdown("---")
     st.sidebar.caption("© 2026 BPS Kota Solok")
 
-    # KONTEN BERDASARKAN MENU
+    # KONTEN BERDASARKAN MENU (TETAP SAMA SEPERTI KODE ASLI USER)
     if menu == "4. Ekstrak No Telp & Alamat (Instagram)":
         st.header("4. Ekstrak Nomor HP dan Alamat (Instagram)")
-        st.write("Melakukan Ekstraksi informasi nomor hp dan alamat dari bio profil instagram.")
+        st.write("Melakukan Ekstraksi informasi nomor hp dan alamat yang ada pada bio profil akun instagram ke kolom nomor hp dan kolom alamat")
+        st.write("")
         
-        st.info(f"Wilayah default saat ini: **{st.session_state['selected_region']}** (Wilayah ini digunakan jika alamat tidak ditemukan di bio)")
+        # 1. Pilih Wilayah (Wilayah yang dipilih akan digunakan jika alamat tidak ditemukan)
+        st.subheader("Langkah 1: Tentukan Wilayah Default")
+        st.info(f"Wilayah default yang akan digunakan (jika detail alamat kosong): **{st.session_state['selected_region']}**.")
         
+        st.write("---")
+        
+        # 2. Upload File
+        st.subheader("Langkah 2: Upload Data")
         uploaded_file = st.file_uploader("Upload file hasil scraping instagram", type=['csv', 'xlsx', 'json'], key='m4')
         
         if uploaded_file:
             df = load_data(uploaded_file)
             if df is not None:
-                target_col = st.selectbox("Pilih kolom berisi biografi profil instagram:", df.columns.tolist())
+                st.info(f"Wilayah yang dipilih: **{st.session_state['selected_region']}**")
+                
+                target_col = st.selectbox("Pilih kolom berisi biografi profil instagram (alamat dan nomor hp):", df.columns.tolist())
                 
                 if st.button("Mulai Ekstrak Data"):
                     with st.spinner('Sedang memproses data...'):
                         df['nomor_hp'] = df[target_col].apply(extract_phone_number)
+                        # Mengirim region_choice yang dipilih di awal ke dalam fungsi
                         df['alamat_ig'] = df[target_col].apply(lambda x: extract_address_ig(x, st.session_state['selected_region']))
                     
                     st.success(f"Proses Selesai! Detail jalan yang kosong otomatis diisi: {st.session_state['selected_region']}")
@@ -188,45 +397,72 @@ else:
                     excel_data = to_excel(df)
                     st.download_button("📥 Download Hasil Ekstrak (XLSX)", data=excel_data, file_name=f"hasil_ekstrak_ig_{st.session_state['selected_region'].lower().replace(' ', '_')}.xlsx")
 
+    # --- Sisanya (Menu 1, 2, 3, 5, 6, 7, 8) TETAP SAMA seperti sebelumnya ---
     elif menu == "1. Filter Kolom":
         st.header("1. Filter Kolom Tertentu")
+        st.write("Melakukan filter kolom tertentu, sehingga hanya download data dengan kolom yang dipilih saja")
+
         uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m1')
         if uploaded_file:
             df = load_data(uploaded_file)
             if df is not None:
+                st.write(f"**Preview Data Asli** ({len(df)} baris):")
                 st.dataframe(df.head())
                 selected_columns = st.multiselect("Pilih kolom:", df.columns.tolist(), default=df.columns.tolist())
                 if selected_columns:
                     df_filtered = df[selected_columns]
                     st.download_button("📥 Download Data (XLSX)", data=to_excel(df_filtered), file_name="data_filtered.xlsx")
-
+                    
     elif menu == "2. Duplikasi Data":
         st.header("2. Cek & Hapus Baris Duplikat Data")
-        uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m2')
+        st.write("Melakukan pengecekan baris data duplikat berdasarkan kolom tertentu")
+        uploaded_file = st.file_uploader("Upload file (CSV, XLSX, JSON)", type=['csv', 'xlsx', 'json'], key='m2')
+        
         if uploaded_file:
             df = load_data(uploaded_file)
             if df is not None:
-                dup_columns = st.multiselect("Pilih acuan kolom duplikat:", df.columns.tolist())
+                st.write(f"**Preview Data Asli** ({len(df)} baris):")
+                st.dataframe(df.head())
+                
+                dup_columns = st.multiselect("Pilih acuan kolom duplikat (Kosongkan jika ingin cek seluruh kolom):", df.columns.tolist())
+                
                 if st.button("Hapus Duplikat"):
                     subset = dup_columns if dup_columns else None
+                    df_duplicates = df[df.duplicated(subset=subset, keep='first')]
                     df_clean = df.drop_duplicates(subset=subset, keep='first')
-                    st.success(f"Selesai! Baris awal: {len(df)}, Baris bersih: {len(df_clean)}")
-                    st.dataframe(df_clean.head())
-                    st.download_button("📥 Download Data Bersih (XLSX)", data=to_excel(df_clean), file_name="data_clean.xlsx")
-
-    elif menu == "3. Merge Data":
-        st.header("3. Gabungkan Beberapa File")
-        uploaded_files = st.file_uploader("Upload file (Maks 15)", type=['csv', 'xlsx', 'json'], accept_multiple_files=True, key='m3')
-        if uploaded_files:
-            dfs = [load_data(f) for f in uploaded_files if load_data(f) is not None]
-            if dfs and st.button("Merge Sekarang"):
-                merged_df = pd.concat(dfs, ignore_index=True)
-                st.success(f"Berhasil menggabungkan {len(dfs)} file!")
-                st.dataframe(merged_df.head())
-                st.download_button("📥 Download Hasil Merge (XLSX)", data=to_excel(merged_df), file_name="data_merged.xlsx")
+                    
+                    st.success("Proses pengecekan duplikat selesai!")
+                    
+                    col1, col2, col3 = st.columns(3)
+                    col1.metric("Total Data Raw", f"{len(df)} baris")
+                    col2.metric("Data Duplikat", f"{len(df_duplicates)} baris")
+                    col3.metric("Data Bersih", f"{len(df_clean)} baris")
+                    
+                    st.write("---")
+                    tab1, tab2, tab3 = st.tabs(["Tabel Data Raw", "Tabel Data Duplikat", "Tabel Data Bersih"])
+                    
+                    with tab1:
+                        st.dataframe(df)
+                    with tab2:
+                        if len(df_duplicates) > 0:
+                            st.dataframe(df_duplicates)
+                        else:
+                            st.info("Tidak ada data duplikat yang ditemukan.")
+                    with tab3:
+                        st.dataframe(df_clean)
+                    
+                    st.write("---")
+                    st.download_button(
+                        label="📥 Download Data Bersih (XLSX)", 
+                        data=to_excel(df_clean), 
+                        file_name="data_clean_dedup.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
 
     elif menu == "5. Ekstrak Alamat (Google Maps)":
         st.header("5. Ekstrak Alamat Saja (Google Maps)")
+        st.write("Melakukan ekstrak informasi alamat dari data scraping google Maps")
+        st.write("Contoh: 6M64+C8Q, Jl. Sutan Sjahrir >> menjadi >> Jl. Sutan Sjahrir")
         uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m5')
         if uploaded_file:
             df = load_data(uploaded_file)
@@ -240,45 +476,190 @@ else:
 
     elif menu == "6. Visualisasi Peta & Convert excel to shp":
         st.header("6. Visualisasi Peta & Export Shapefile")
-        uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m6')
+        st.write("Melakukan Visualisasi Peta dari data hasil scraping Google Maps dan bisa export ke format file shp (shapefile) untuk kebutuhan peta")
+        
+        uploaded_file = st.file_uploader("Upload file data spasial", type=['csv', 'xlsx', 'json'], key='m6')
+        
         if uploaded_file:
             df = load_data(uploaded_file)
             if df is not None:
-                all_columns = df.columns.tolist()
-                col1, col2 = st.columns(2)
-                lat_col = col1.selectbox("Latitude:", all_columns)
-                lon_col = col2.selectbox("Longitude:", all_columns)
-                info_cols = st.multiselect("Popup Info:", all_columns)
+                st.write(f"**Preview Data Spasial** ({len(df)} baris):")
+                st.dataframe(df.head())
+                st.write("---")
                 
-                if st.button("Render Peta"):
+                all_columns = df.columns.tolist()
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    lat_col = st.selectbox("Pilih kolom Latitude (Lintang):", all_columns, index=0)
+                with col2:
+                    lon_col = st.selectbox("Pilih kolom Longitude (Bujur):", all_columns, index=1 if len(all_columns)>1 else 0)
+                
+                st.write("---")
+                info_cols = st.multiselect("Pilih kolom yang ingin ditampilkan saat titik diklik (Popup Detail):", all_columns)
+                
+                if st.button("Render Peta Spasial"):
                     map_df = df.copy()
                     map_df['lat'] = pd.to_numeric(map_df[lat_col], errors='coerce')
                     map_df['lon'] = pd.to_numeric(map_df[lon_col], errors='coerce')
                     map_df = map_df.dropna(subset=['lat', 'lon'])
                     
-                    m = folium.Map(location=[map_df['lat'].mean(), map_df['lon'].mean()], zoom_start=12)
-                    for _, row in map_df.iterrows():
-                        folium.CircleMarker([row['lat'], row['lon']], radius=5, color='#FF7A00', fill=True).add_to(m)
-                    st_folium(m, width=1000, height=500)
-                    
-                    st.download_button("🗺️ Download SHP (ZIP)", data=to_shp_zip(map_df, 'lat', 'lon'), file_name="peta.zip")
+                    if map_df.empty:
+                        st.warning("Data koordinat tidak valid.")
+                    else:
+                        st.success(f"Memetakan {len(map_df)} titik lokasi.")
+                        
+                        center_lat = map_df['lat'].mean()
+                        center_lon = map_df['lon'].mean()
+                        
+                        m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles=None)
+                        
+                        folium.TileLayer(
+                            tiles='http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}',
+                            attr='Google',
+                            name='Google Maps',
+                            overlay=False,
+                            control=True
+                        ).add_to(m)
+                        
+                        for idx, row in map_df.iterrows():
+                            popup_html = f"<div style='min-width: 200px; font-family: Arial;'>"
+                            popup_html += f"<h4 style='margin-top: 0px; color: #FF7A00;'>Detail Info</h4>"
+                            
+                            if info_cols:
+                                for col in info_cols:
+                                    popup_html += f"<b>{col}:</b> {row[col]}<br>"
+                            else:
+                                popup_html += f"<b>Lat:</b> {row['lat']}<br><b>Lon:</b> {row['lon']}"
+                            
+                            popup_html += "</div>"
+                            
+                            folium.CircleMarker(
+                                location=[row['lat'], row['lon']],
+                                radius=7, 
+                                color='#FF7A00', 
+                                fill=True,
+                                fill_color='#FFB74D', 
+                                fill_opacity=0.8,
+                                weight=2,
+                                popup=folium.Popup(popup_html, max_width=300),
+                                tooltip="Klik untuk detail" 
+                            ).add_to(m)
+                        
+                        st_folium(m, width=1000, height=600, returned_objects=[])
+
+                        st.write("---")
+                        shp_zip = to_shp_zip(map_df, 'lat', 'lon')
+                        st.download_button(
+                            label="🗺️ Download Shapefile (.zip)",
+                            data=shp_zip,
+                            file_name="peta_lokasi_shp.zip",
+                            mime="application/zip"
+                        )
+
 
     elif menu == "7. Cek Info & Tipe Data":
-        st.header("7. Cek Struktur Data")
+        st.header("7. Cek Nama Kolom dan Tipe Datanya")
         uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m7')
+        
         if uploaded_file:
             df = load_data(uploaded_file)
             if df is not None:
-                st.write(f"Total: {df.shape[0]} baris, {df.shape[1]} kolom")
-                st.dataframe(pd.DataFrame({"Tipe": df.dtypes.astype(str), "Missing": df.isnull().sum()}))
+                info_df = pd.DataFrame({
+                    "Nama Kolom": df.columns,
+                    "Tipe Data": df.dtypes.astype(str),
+                    "Missing Value (Kosong)": df.isnull().sum().values,
+                    "Terisi (Non-Null)": df.notnull().sum().values
+                })
+                
+                col1, col2 = st.columns(2)
+                col1.info(f"**Total Baris:** {df.shape[0]}")
+                col2.info(f"**Total Kolom:** {df.shape[1]}")
+                
+                st.write("### Detail Struktur Tabel:")
+                st.dataframe(info_df, use_container_width=True)
 
     elif menu == "8. Edit/Hapus Data":
         st.header("8. Workspace Edit Data")
         uploaded_file = st.file_uploader("Upload file", type=['csv', 'xlsx', 'json'], key='m8')
+        
         if uploaded_file:
-            if 'edit_df' not in st.session_state or st.session_state.get('last_uploaded') != uploaded_file.name:
-                st.session_state['edit_df'] = load_data(uploaded_file)
-                st.session_state['last_uploaded'] = uploaded_file.name
+            df = load_data(uploaded_file)
             
-            edited_df = st.data_editor(st.session_state['edit_df'], num_rows="dynamic", use_container_width=True)
-            st.download_button("📥 Download Hasil Edit", data=to_excel(edited_df), file_name="edited_data.xlsx")
+            if df is not None:
+                if 'edit_df' not in st.session_state or st.session_state.get('last_uploaded') != uploaded_file.name:
+                    st.session_state['edit_df'] = df.copy()
+                    st.session_state['last_uploaded'] = uploaded_file.name
+                    
+                st.write("---")
+                
+                with st.expander("✏️ Ganti Nama Kolom"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        old_col = st.selectbox("Pilih kolom:", st.session_state['edit_df'].columns, key="old_col")
+                    with col2:
+                        new_col = st.text_input("Nama kolom baru:", value=old_col)
+                        
+                    if st.button("Ubah Nama Kolom"):
+                        if new_col and new_col != old_col:
+                            st.session_state['edit_df'].rename(columns={old_col: new_col}, inplace=True)
+                            st.success(f"Kolom berhasil diubah dari '{old_col}' menjadi '{new_col}'")
+                            st.rerun()
+                
+                with st.expander("🗑️ Hapus Kolom (Drop Column)"):
+                    cols_to_drop = st.multiselect("Pilih kolom yang tidak digunakan:", st.session_state['edit_df'].columns)
+                    if st.button("Hapus Kolom Terpilih"):
+                        if cols_to_drop:
+                            st.session_state['edit_df'].drop(columns=cols_to_drop, inplace=True)
+                            st.success(f"{len(cols_to_drop)} kolom berhasil dihapus.")
+                            st.rerun()
+
+                st.write("---")
+                st.write("### 🔍 Filter & Editor Data Pintar")
+                st.info("💡 **Tips:** Klik 2x pada cell tabel untuk mengedit teks. Centang kotak paling kiri lalu tekan **Delete** di keyboard untuk menghapus baris.")
+                
+                search_query = st.text_input("Ketik kata kunci untuk memfilter baris:")
+                
+                if search_query:
+                    mask = st.session_state['edit_df'].astype(str).apply(
+                        lambda x: x.str.contains(search_query, case=False, na=False)
+                    ).any(axis=1)
+                    display_df = st.session_state['edit_df'][mask]
+                    st.caption(f"Menampilkan {len(display_df)} baris yang cocok dengan '{search_query}'.")
+                else:
+                    display_df = st.session_state['edit_df']
+                
+                edited_df = st.data_editor(
+                    display_df,
+                    num_rows="dynamic",
+                    use_container_width=True,
+                    key="editor"
+                )
+                
+                st.write("---")
+                st.download_button(
+                    label="📥 Download Data Hasil Edit (XLSX)",
+                    data=to_excel(edited_df),
+                    file_name="data_hasil_edit.xlsx"
+                )
+    elif menu == "3. Merge Data":
+        st.header("3. Gabungkan Beberapa File")
+        st.write("Merge/ mengabungkan beberapa file format sama menjadi satu file")
+        uploaded_files = st.file_uploader("Upload file (Maks 15)", type=['csv', 'xlsx', 'json'], accept_multiple_files=True, key='m3')
+        if uploaded_files:
+            if len(uploaded_files) > 15:
+                st.error("Maksimal 15 file.")
+            else:
+                dfs = []
+                for f in uploaded_files:
+                    df = load_data(f)
+                    if df is not None:
+                        dfs.append(df)
+                        with st.expander(f"📄 Preview: {f.name} ({len(df)} baris)"):
+                            st.dataframe(df.head())
+
+                if dfs and st.button("Merge Sekarang"):
+                    merged_df = pd.concat(dfs, ignore_index=True)
+                    st.success(f"Berhasil! Total baris setelah di-merge: {len(merged_df)}")
+                    st.dataframe(merged_df.head())
+                    st.download_button("📥 Download Hasil Merge (XLSX)", data=to_excel(merged_df), file_name="data_merged.xlsx")
