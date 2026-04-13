@@ -15,10 +15,10 @@ from streamlit_folium import st_folium
 # ==========================================
 st.set_page_config(page_title="KUDO Data Processing", page_icon="🟠", layout="wide")
 
-# Custom CSS untuk tampilan Dashboard & Menyembunyikan Sidebar
+# Custom CSS untuk tampilan Dashboard
 st.markdown("""
 <style>
-    /* Menyembunyikan Sidebar secara permanen */
+    /* Menyembunyikan Sidebar */
     [data-testid="stSidebar"] {
         display: none;
     }
@@ -45,7 +45,7 @@ st.markdown("""
     div.stButton > button {
         background-color: #FF7A00;
         color: white;
-        border-radius: 10px;
+        border-radius: 15px;
         padding: 20px;
         font-weight: bold;
         border: none;
@@ -58,13 +58,16 @@ st.markdown("""
         transform: scale(1.02);
     }
     
-    /* Grid Menu Text */
+    /* Grid Menu Text (DIUBAH KE HITAM) */
     .menu-label {
         text-align: center;
-        color: white;
-        font-weight: 600;
+        color: #000000 !important; /* Warna Hitam */
+        font-weight: 800; /* Lebih tebal agar terlihat di background gelap */
         margin-top: -10px;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        background-color: rgba(255, 255, 255, 0.2); /* Opsional: sedikit background terang agar terbaca */
+        border-radius: 5px;
+        padding: 2px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -156,7 +159,6 @@ if st.session_state.page == 'welcome':
 # 2. SELEKSI WILAYAH
 elif st.session_state.page == 'region_selection':
     st.markdown("<h2 style='text-align:center;'>Pilih Wilayah Default</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:white;'>Wilayah ini akan otomatis digunakan untuk fitur Ekstrak IG</p>", unsafe_allow_html=True)
     
     col_l, col_c, col_r = st.columns([1,1,1])
     with col_c:
@@ -171,7 +173,7 @@ elif st.session_state.page == 'region_selection':
             st.session_state.page = 'dashboard'
             st.rerun()
 
-# 3. DASHBOARD MENU (GRID STYLE)
+# 3. DASHBOARD MENU
 elif st.session_state.page == 'dashboard':
     st.markdown("<h1 style='text-align:center;'>MAIN MENU KUDO</h1>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align:center; color:gray;'>Wilayah Aktif: {st.session_state.default_region}</p>", unsafe_allow_html=True)
@@ -208,10 +210,9 @@ elif st.session_state.page == 'dashboard':
         if st.button("🔄\n\nGanti Wilayah"): st.session_state.page = 'region_selection'; st.rerun()
         st.markdown("<div class='menu-label'>Reset Wilayah</div>", unsafe_allow_html=True)
 
-# ==========================================
-# LOGIKA FITUR
-# ==========================================
-
+# ------------------------------------------
+# LOGIKA FITUR (SAMA SEPERTI SEBELUMNYA)
+# ------------------------------------------
 def back_btn():
     if st.button("⬅️ Kembali ke Menu Utama"):
         st.session_state.page = 'dashboard'
@@ -244,7 +245,7 @@ elif st.session_state.page == 'm2':
 elif st.session_state.page == 'm3':
     st.header("3. Gabung File (Merge)")
     back_btn()
-    files = st.file_uploader("Upload file (Maks 15)", accept_multiple_files=True)
+    files = st.file_uploader("Upload file", accept_multiple_files=True)
     if files:
         dfs = [load_data(f) for f in files if load_data(f) is not None]
         if st.button("Gabungkan Sekarang"):
@@ -264,8 +265,8 @@ elif st.session_state.page == 'm4':
             if st.button("Mulai Ekstrak"):
                 df['nomor_hp'] = df[target].apply(extract_phone_number)
                 df['alamat_ig'] = df[target].apply(lambda x: extract_address_ig(x, st.session_state.default_region))
-                st.dataframe(df[[target, 'nomor_hp', 'alamat_ig']].head())
-                st.download_button("📥 Download Hasil", data=to_excel(df), file_name="ekstrak_ig.xlsx")
+                st.dataframe(df.head())
+                st.download_button("📥 Download", data=to_excel(df), file_name="ekstrak_ig.xlsx")
 
 elif st.session_state.page == 'm5':
     st.header("5. Ekstrak Alamat Google Maps")
@@ -277,7 +278,7 @@ elif st.session_state.page == 'm5':
             target = st.selectbox("Kolom Alamat Raw:", df.columns.tolist())
             if st.button("Ekstrak Alamat"):
                 df['alamat_bersih'] = df[target].apply(extract_address_gmaps)
-                st.dataframe(df[[target, 'alamat_bersih']].head())
+                st.dataframe(df.head())
                 st.download_button("📥 Download", data=to_excel(df), file_name="maps_clean.xlsx")
 
 elif st.session_state.page == 'm6':
@@ -294,7 +295,7 @@ elif st.session_state.page == 'm6':
                 for _, row in df.iterrows():
                     folium.Marker([row[lat], row[lon]]).add_to(m)
                 st_folium(m, width=700)
-                st.download_button("📥 Download SHP (Zip)", data=to_shp_zip(df, lat, lon), file_name="peta.zip")
+                st.download_button("📥 Download SHP", data=to_shp_zip(df, lat, lon), file_name="peta.zip")
 
 elif st.session_state.page == 'm7':
     st.header("7. Informasi Struktur Data")
@@ -304,7 +305,6 @@ elif st.session_state.page == 'm7':
         df = load_data(uploaded_file)
         if df is not None:
             st.write(df.dtypes)
-            st.write(f"Total Missing: {df.isnull().sum().sum()}")
 
 elif st.session_state.page == 'm8':
     st.header("8. Workspace Editor")
@@ -313,8 +313,7 @@ elif st.session_state.page == 'm8':
     if uploaded_file:
         df = load_data(uploaded_file)
         edited_df = st.data_editor(df)
-        st.download_button("📥 Simpan Perubahan", data=to_excel(edited_df), file_name="edited.xlsx")
+        st.download_button("📥 Simpan", data=to_excel(edited_df), file_name="edited.xlsx")
 
-# Footnote di area utama (sebagai ganti sidebar)
 st.markdown("---")
 st.caption("© 2026 BPS Kota Solok - KUDO v2.0")
