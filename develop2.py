@@ -200,19 +200,19 @@ elif st.session_state['app_mode'] == 'main':
     with c1:
         st.markdown('<h2 style="text-align:center;">🖨️</h2>', unsafe_allow_html=True)
         if st.button("1. Filter Kolom"): st.session_state['active_menu'], st.session_state['app_mode'] = "1. Filter Kolom", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Filter kolom data</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Filter kolom data</p>', unsafe_allow_html=True)
     with c2:
         st.markdown('<h2 style="text-align:center;">🖥️</h2>', unsafe_allow_html=True)
         if st.button("2. Duplikasi"): st.session_state['active_menu'], st.session_state['app_mode'] = "2. Duplikasi Data", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Hapus data ganda</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Hapus data ganda</p>', unsafe_allow_html=True)
     with c3:
         st.markdown('<h2 style="text-align:center;">🎧</h2>', unsafe_allow_html=True)
         if st.button("3. Merge Data"): st.session_state['active_menu'], st.session_state['app_mode'] = "3. Merge Data", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Gabung banyak file</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Gabung banyak file</p>', unsafe_allow_html=True)
     with c4:
         st.markdown('<h2 style="text-align:center;">📸</h2>', unsafe_allow_html=True)
         if st.button("4. Instagram"): st.session_state['active_menu'], st.session_state['app_mode'] = "4. Ekstrak No Telp & Alamat (Instagram)", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Ekstrak Bio IG</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Ekstrak Bio IG</p>', unsafe_allow_html=True)
 
     st.markdown('<div style="width:100%; height:10px;"></div>', unsafe_allow_html=True)
 
@@ -220,19 +220,19 @@ elif st.session_state['app_mode'] == 'main':
     with c5:
         st.markdown('<h2 style="text-align:center;">⚙️</h2>', unsafe_allow_html=True)
         if st.button("5. GMaps"): st.session_state['active_menu'], st.session_state['app_mode'] = "5. Ekstrak Alamat (Google Maps)", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Ekstrak Alamat Maps</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Ekstrak Alamat Maps</p>', unsafe_allow_html=True)
     with c6:
         st.markdown('<h2 style="text-align:center;">🖱️</h2>', unsafe_allow_html=True)
         if st.button("6. Peta & SHP"): st.session_state['active_menu'], st.session_state['app_mode'] = "6. Visualisasi Peta & Convert excel to shp", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Peta & Shapefile</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Peta & Shapefile</p>', unsafe_allow_html=True)
     with c7:
         st.markdown('<h2 style="text-align:center;">⬇️</h2>', unsafe_allow_html=True)
         if st.button("7. Cek Tipe"): st.session_state['active_menu'], st.session_state['app_mode'] = "7. Cek Info & Tipe Data", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Info struktur data</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Info struktur data</p>', unsafe_allow_html=True)
     with c8:
         st.markdown('<h2 style="text-align:center;">📝</h2>', unsafe_allow_html=True)
         if st.button("8. Edit Data"): st.session_state['active_menu'], st.session_state['app_mode'] = "8. Edit/Hapus Data", "feature_active"; st.rerun()
-        st.markdown('<p class="menu-item-desc">Workspace Edit</p>', unsafe_allow_html=True)
+        #st.markdown('<p class="menu-item-desc">Workspace Edit</p>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     col_back = st.columns([2,1,2])
